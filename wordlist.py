@@ -1,86 +1,154 @@
-import string
 import random
 import time
 import os
-import sys
 
 
 class WordList:
     """
         WordList Handler Script
-        author: NightFox | wordlist Beta v0.1
+        author: NightFox | wordlist Beta v0.2
         e-mail: mking4everking@gmail.com
         git-hub: @MKing4ever
         GNU Open-Source Certification
     """
 
+    # notification of features and changes
+
     def __init__(self):
-        self.data = ' '  # string | my wordlist
+        # lists
+        self.words = ['pass', 'passwd', 'password']  # list | my wordlist
+        self.exceptions = [' ', '']  # list | my exceptions wordlist
+        # file address
+        self.address = './'
+        self.filename = 'WordList.txt'
 
     def __repr__(self):
-        return f'WordList Module\nLength: {self.__len__()}\nBackup: {os.path.isfile("WordList.txt")}'
+        return f'WordList Module v0.2\nLength: {self.__len__()}\nBackup: {self.exist}\nAddress: {self.file}'
 
     def __str__(self):
-        return self.data
+        return self.list2str(self.data)
 
     def __iter__(self):
-        return iter(self._duplicate())
+        return iter(self.data)
 
     def __len__(self):
-        return len(self.data.split('\n'))  # default split with '\n'
+        return len(self.data)
+
+    @property
+    def data(self):
+        self.words = self.duplicate(self.words)  # Difference between 'words' and 'data'
+        return self.words + self.exceptions
+
+    @property
+    def file(self):
+        return self.address + self.filename  # ./WordList.txt
+
+    @property
+    def exist(self):
+        return os.path.isfile(self.file)
 
     @staticmethod
-    def echo(value):
-        pass
-
-    def _import(self, address='./'):
-        _address = address
-        _filename = 'WordList.txt'
-        _file = _address + _filename
-        if os.path.isfile(_file):
-            with open(_file, 'r') as file:  # (READ)
-                _data = file.readlines()  # list
-                self.data += '\n' + ''.join(_data)  # string | update my wordlist
+    def delay(secs=0):
+        # make an interrupt
+        if secs:
+            time.sleep(secs)
         else:
-            print(f'No \'{_filename}\' Found.')
+            time.sleep(random.random() / 3.1415926535)
 
-    def _export(self, address='./'):
-        _data = self.data  # string
-        _address = address
-        _filename = 'WordList.txt'
-        _file = _address + _filename
-        with open(_file, 'w') as file:  # (WRITE)
-            file.write(_data)  # write a new 'WordList.txt'
+    @staticmethod
+    def str2list(data: str) -> list:
+        return data.split()  # split with ' '-(Space) and '\n'-(NewLine)
 
-    def _extend(self, address='./'):
-        _data = '\n' + self.data  # string | extend new data start with new line.
-        _address = address
-        _filename = 'WordList.txt'
-        _file = _address + _filename
-        if os.path.isfile(_file):
-            with open(_file, 'a') as file:  # (APPEND)
-                file.write(_data)  # update the 'WordList.txt'
+    @staticmethod
+    def list2str(data: list) -> str:
+        return '\n'.join(data)  # make a True wordlist | merge words with '\n'-NewLine
+
+    @staticmethod
+    def duplicate(data: list):
+        return sorted(list(set(data)))  # remove duplicates and return sorted list
+
+    @staticmethod
+    def question(quest, answer):
+        a = input(quest)
+        if a and a != answer:
+            answer = a
+        return answer
+
+    def echo(self, value: str):
+        # print, write, type, echo... this function have many names
+        for line in value.split('\n'):  # support multi-line text
+            chars = ''
+            for char in line:
+                chars += char
+                print(f'\r{chars}', end='')
+                if char != ' ':  # skip Spaces
+                    self.delay()
+            print('')  # NewLine
+
+    def import_list(self):
+        if self.exist:
+            with open(self.file, 'r') as file:
+                data = file.read()
+                self.words.extend(self.str2list(data))
+            self.echo(f'File \'{self.filename}\' imported.')
         else:
-            print(f'No \'{_filename}\' Found.')
+            self.echo(f'No \'{self.filename}\' Found.')
 
-    def _read(self):
-        _data = self.data
-        print(_data)
-        print('---' * 10 + f'\nlength: {self.__len__()}')
+    def export_list(self):
+        self.echo(f'File \'{self.filename}\' {"already exist." if self.exist else "not exist."}')
+        with open(self.file, 'w') as file:
+            file.write(self.list2str(self.data))
+        self.echo(f'File \'{self.filename}\' exported.')
 
-    def _word(self, word: str):
-        _w = word.split('\n')  # list | split input data
-        _s = self._duplicate()  # set | wordlist with no duplicate
-        _s = _s.union(_w)  # union Input and Wordlist
-        self.data = '\n'.join(_s)  # str | join with '\n' (new-line). update my wordlist
+    def extend_list(self):
+        if self.exist:
+            with open(self.file, 'a') as file:
+                file.write(self.list2str(self.data))
+            self.echo(f'File \'{self.filename}\' extended.')
+        else:
+            self.echo(f'No \'{self.filename}\' Found.')
 
-    def _duplicate(self):
-        _data = self.data.split('\n')  # list | split with '\n' (new-line).
-        _s = set(_data)  # set | remove possible duplicate
-        self.data = '\n'.join(_s)  # str | update my wordlist
-        return _s  # return set
+    def new_list(self):
+        self.echo('Please enter address and file name.')
+        self.address = self.question('file address:', './')
+        self.filename = self.question('file name:', 'WordList.txt')
 
-    def _remove(self, word):
-        _s = self._duplicate()  # set
-        _s.remove(word)
-        self.data = '\n'.join(_s)  # update my wordlist
+    def delete_list(self):
+        if self.exist:
+            os.remove(self.file)
+            self.echo(f'File \'{self.filename}\' deleted.')
+        else:
+            self.echo(f'No \'{self.filename}\' Found.')
+
+    def read(self):
+        data = [f"[{k:{len(str(self.__len__()))}}] | \'{v}\'" for k, v in enumerate(self.data)]
+        print(self.list2str(data))
+        self.echo('-   -   ' * 5 + f'\nLength: {self.__len__()}')
+
+    def add_word(self, word: str):
+        data = self.str2list(word)  # list | turn  str (input argument) to list
+        self.words.extend(data)  # update wordlist
+        self.echo(f'Length: {self.__len__()}')
+
+    def remove_word(self, data: str):
+        if data in self.words:
+            self.words.remove(data)  # update wordlist
+            self.echo(f'Length: {self.__len__()}')
+        else:
+            self.echo(f'You can\'t remove \"{data}\" !')
+
+    def clear(self):
+        self.echo('Clear list and back to default?')
+        ans = input('Y/n/c | Default: Yes').lower().strip()
+        if ans in ['', ' ', 'y', 'yes']:
+            self.address = './'  # back to default address
+            self.filename = 'WordList.txt'  # default filename
+            self.words = self.exceptions = []  # Clear wordlist
+            self.echo('Done.')
+        elif ans in ['n', 'no']:
+            self.echo('Process suspended.')
+        elif ans in ['c', 'clear']:
+            self.words = self.exceptions = []  # Clear wordlist
+            self.echo('wordlist cleared.')
+        else:
+            self.echo('Invalid input: Process canceled.')
