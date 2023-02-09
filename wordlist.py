@@ -1,12 +1,27 @@
 import random
 import time
 import os
+from functools import wraps
+
+
+def exe_time(func):
+    """execution time, decorator"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        _start = time.time()
+        result = func(*args, *kwargs)
+        _end = time.time()
+        print(f'Execution Time: {_end - _start}')
+        return result
+
+    return wrapper
 
 
 class WordList:
     """
         WordList Handler Script
-        author: NightFox | wordlist Beta v0.2
+        author: NightFox | wordlist Beta v0.2.1
         e-mail: mking4everking@gmail.com
         git-hub: @MKing4ever
         GNU Open-Source Certification
@@ -53,7 +68,7 @@ class WordList:
         if secs:
             time.sleep(secs)
         else:
-            time.sleep(random.random() / 3.1415926535)
+            time.sleep((random.random() / 3.1415926535).__pow__(2))
 
     @staticmethod
     def str2list(data: str) -> list:
@@ -69,7 +84,7 @@ class WordList:
 
     @staticmethod
     def question(quest, answer):
-        a = input(quest)
+        a = input(quest).strip()
         if a and a != answer:
             answer = a
         return answer
@@ -85,21 +100,24 @@ class WordList:
                     self.delay()
             print('')  # NewLine
 
+    @exe_time
     def import_list(self):
         if self.exist:
             with open(self.file, 'r') as file:
-                data = file.read()
-                self.words.extend(self.str2list(data))
-            self.echo(f'File \'{self.filename}\' imported.')
+                data = self.str2list(file.read())
+                self.words.extend(data)
+            self.echo(f'File \'{self.filename}\' imported. ({len(data)})')
         else:
             self.echo(f'No \'{self.filename}\' Found.')
 
+    @exe_time
     def export_list(self):
         self.echo(f'File \'{self.filename}\' {"already exist." if self.exist else "not exist."}')
         with open(self.file, 'w') as file:
             file.write(self.list2str(self.data))
         self.echo(f'File \'{self.filename}\' exported.')
 
+    @exe_time
     def extend_list(self):
         if self.exist:
             with open(self.file, 'a') as file:
@@ -120,22 +138,30 @@ class WordList:
         else:
             self.echo(f'No \'{self.filename}\' Found.')
 
+    @exe_time
     def read(self):
-        data = [f"[{k:{len(str(self.__len__()))}}] | \'{v}\'" for k, v in enumerate(self.data)]
+        x = len(str(self.__len__()))  # length reserved
+        data = [f'[{k:{x}}]: {v}' for k, v in enumerate(self.data)]
         print(self.list2str(data))
         self.echo('-   -   ' * 5 + f'\nLength: {self.__len__()}')
 
+    @exe_time
     def add_word(self, word: str):
         data = self.str2list(word)  # list | turn  str (input argument) to list
         self.words.extend(data)  # update wordlist
         self.echo(f'Length: {self.__len__()}')
 
-    def remove_word(self, data: str):
-        if data in self.words:
-            self.words.remove(data)  # update wordlist
+    @exe_time
+    def add_words(self, words: list):
+        self.words.extend(words)  # update wordlist
+        self.echo(f'Length: {self.__len__()}')
+
+    def remove_word(self, word: str):
+        if word in self.words:
+            self.words.remove(word)  # update wordlist
             self.echo(f'Length: {self.__len__()}')
         else:
-            self.echo(f'You can\'t remove \"{data}\" !')
+            self.echo(f'You can\'t remove \"{word}\" !')
 
     def clear(self):
         self.echo('Clear list and back to default?')
@@ -152,3 +178,12 @@ class WordList:
             self.echo('wordlist cleared.')
         else:
             self.echo('Invalid input: Process canceled.')
+
+    def info(self):
+        fn = ['data', 'file', 'exist', 'delay(secs)', 'str2list(data)', 'list2str(data)', 'duplicate(data)',
+              'question(quest,answer)', 'echo(self, value)', 'import_list(self)',
+              'export_list(self)', 'extend_list(self)', 'new_list(self)', 'delete_list(self)', 'read(self)',
+              'add_word(self, word)', 'add_words(self, words)', 'remove_word(self,word)', 'clear(self)',
+              'info(self)']
+        self.echo(f'- WordList Functions (Total:{len(fn)})')
+        print(self.list2str(['WordList.' + _name for _name in fn]))
