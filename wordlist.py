@@ -12,7 +12,7 @@ def exe_time(func):
         _start = time.time()
         result = func(*args, *kwargs)
         _end = time.time()
-        print(f'Execution Time: {_end - _start}')
+        print(f'Execution Time: {_end - _start:.3}')
         return result
 
     return wrapper
@@ -38,7 +38,7 @@ class WordList:
         self.filename = 'WordList.txt'
 
     def __repr__(self):
-        return f'WordList Module v0.2\nLength: {self.__len__()}\nBackup: {self.exist}\nAddress: {self.file}'
+        return f'WordList Module v0.2.1\nLength: {self.__len__()}\nBackup: {self.exist}\nAddress: {self.file}'
 
     def __str__(self):
         return self.list2str(self.data)
@@ -60,11 +60,11 @@ class WordList:
 
     @property
     def exist(self):
-        return os.path.isfile(self.file)
+        return os.path.isfile(self.file)  # is "./WordList.txt" file & exist
 
     @staticmethod
     def delay(secs=0):
-        # make an interrupt
+        """make an interrupt"""
         if secs:
             time.sleep(secs)
         else:
@@ -84,13 +84,14 @@ class WordList:
 
     @staticmethod
     def question(quest, answer):
+        """make sure answer is not ''(empty str) or just ' '(space)"""
         a = input(quest).strip()
         if a and a != answer:
             answer = a
         return answer
 
     def echo(self, value: str):
-        # print, write, type, echo... this function have many names
+        """print, write, type, echo... this function have many names"""
         for line in value.split('\n'):  # support multi-line text
             chars = ''
             for char in line:
@@ -153,7 +154,8 @@ class WordList:
 
     @exe_time
     def add_words(self, words: list):
-        self.words.extend(words)  # update wordlist
+        w = [f'{i}' for i in words]
+        self.words.extend(w)  # update wordlist
         self.echo(f'Length: {self.__len__()}')
 
     def remove_word(self, word: str):
@@ -187,3 +189,4 @@ class WordList:
               'info(self)']
         self.echo(f'- WordList Functions (Total:{len(fn)})')
         print(self.list2str(['WordList.' + _name for _name in fn]))
+        self.echo('for more information use \'help()\', \'dir()\' or __dir__ Built-in Functions')
